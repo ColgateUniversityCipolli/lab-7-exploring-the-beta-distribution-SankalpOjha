@@ -1,5 +1,8 @@
 library(tidyverse)
 library(nleqslv)
+library(e1071)
+library(ggplot2)
+library(patchwork)
 
 drates.csv <- read_csv("worldbankdata/deathrates.csv")
 
@@ -42,20 +45,92 @@ optim(par = c(1, 1),
       data = drates.2022$rate,
       neg = T)
 
+
+sample.size <- 266
+
+
+
+task.eight.data <- tibble()
+
 for(i in 1:1000){
   set.seed(7272+i)
   
+  alpha <- 8
+  beta <- 950
+  
+  sample.beta <- rbeta(n = sample.size,  
+                       shape1 = alpha,  
+                       shape2 = beta) 
+  
+  curr.mom <- nleqslv(x = c(1, 1),
+                      fn = mom.estimate,
+                      data = sample.beta)
+  
+  curr.mle <- optim(par = c(1, 1),
+                    fn = mle.estimate,
+                    data = sample.beta,
+                    neg = T)
+  
+  task.eight.data <- bind_rows(task.eight.data, tibble(curr.mom$x[1], 
+                                                       curr.mom$x[2],
+                                                       curr.mle$par[1],
+                                                       curr.mle$par[2]))
 }
 
+task.eight.data <- task.eight.data |>
+  rename(moms.alpha = `curr.mom$x[1]`  ,
+         moms.beta  = `curr.mom$x[2]`  ,
+         mles.alpha = `curr.mle$par[1]`,
+         mles.beta  = `curr.mle$par[2]`)
 
-summary <- tibble(
-  bias = numeric(),
-  precision = numeric(),
-  MSE = numeric()
-)
+view(task.eight.data)
+
+mom.alpha.plot <- ggplot(data=task.eight.data)+
+  geom_density(aes(x=moms.alpha, color = "MOMs Alpha"), color = "blue", fill = "grey") +
+  geom_hline(aes(yintercept = 0), color = "green")
+
+mom.beta.plot <- ggplot(data=task.eight.data)+
+  geom_density(aes(x=moms.beta, color = "MOMs Beta"), color = "blue", fill = "grey") +
+  geom_hline(aes(yintercept = 0), color = "green")
+
+mle.alpha.plot <- ggplot(data=task.eight.data)+
+  geom_density(aes(x=mles.alpha, color = "MLEs Alpha"), color = "blue", fill = "grey") +
+  geom_hline(aes(yintercept = 0), color = "green")
+
+mle.beta.plot <- ggplot(data=task.eight.data)+
+  geom_density(aes(x=mles.beta, color = "MLEs Beta"), color = "blue", fill = "grey") +
+  geom_hline(aes(yintercept = 0), color = "green")
+
+all.plots <- (mom.alpha.plot + mom.beta.plot) / (mle.alpha.plot + mle.beta.plot)
+
+(all.plots)
 
 
+#bias
+bias.mom.alpha <- mean(task.eight.data$moms.alpha) - 8
+bias.mle.alpha <- mean(task.eight.data$mles.alpha) - 8
+bias.mom.beta <- mean(task.eight.data$moms.beta) - 950
+bias.mle.beta <- mean(task.eight.data$mles.beta) - 950
 
+# precision
+precision.mom.alpha <- 1/var(task.eight.data$moms.alpha)
+precision.mle.alpha <- 1/var(task.eight.data$mles.alpha)
+precision.mom.beta <- 1/var(task.eight.data$moms.beta)
+precision.mle.beta <- 1/var(task.eight.data$mles.beta)
 
+# mse
+mse.mom.alpha <- var(task.eight.data$moms.alpha) + (bias.mom.alpha)^2
+mse.mle.alpha <- var(task.eight.data$mles.alpha) + (bias.mle.alpha)^2
+mse.mom.beta <- var(task.eight.data$moms.beta) + (bias.mom.beta)^2
+mse.mle.beta <- var(task.eight.data$mles.beta) + (bias.mle.beta)^2
 
-)
+summary.table <- tibble(parameters = rep(c("Alpha", "Beta"), each = 2),
+                          method = rep(c("MOM", "MLE"), times = 2),
+                          bias = c(bias.mom.alpha, bias.mle.alpha, 
+                                   bias.mom.beta, bias.mle.beta),
+                          precision = c(precision.mom.alpha, precision.mle.alpha,
+                                        precision.mom.beta, precision.mle.beta),
+                          mse = c(mse.mom.alpha, mse.mle.alpha,
+                                  mse.mom.beta, mse.mle.beta))
+
+view(summary.table)
