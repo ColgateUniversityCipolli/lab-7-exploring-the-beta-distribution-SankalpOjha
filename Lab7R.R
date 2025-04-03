@@ -9,8 +9,8 @@ calculate.data <- function(alpha, beta) {
   varience <- (alpha * beta) / (((alpha + beta)**2) * (alpha + beta + 1))
   skewness <- (2 * (beta - alpha) * ((alpha + beta + 1) ** (1/2))) / 
     ((alpha + beta + 2) * ((alpha * beta) ** (1/2)))
-  kurt <- (6 * (((alpha + beta)**2) * (alpha + beta + 1) - (alpha * beta) * (alpha + beta + 2)) / 
-             ((alpha * beta) * (alpha + beta + 2) * (alpha + beta + 3))) - 3
+  kurt <- (6 * (((alpha - beta)**2) * (alpha + beta + 1) - (alpha * beta) * (alpha + beta + 2)) / 
+             ((alpha * beta) * (alpha + beta + 2) * (alpha + beta + 3)))
   
   data <- tibble(
     mean = mean,
@@ -28,7 +28,8 @@ make.plots <- function(alpha, beta) {
     mutate(beta.pdf = dbeta(x, alpha, beta))
   
   ggplot(data = beta.figure.data) +
-    geom_line(aes(x=x, y=beta.pdf))
+    geom_line(aes(x=x, y=beta.pdf))+
+    ylab("Density")
 }
 
 data1 <- calculate.data(2, 5)

@@ -78,13 +78,13 @@
 \title{Lab XX -- MATH 240 -- Computational Statistics}
 
 \author{
-  First Author \\
-  Affiliation  \\
-  Department  \\
-  {\tt email@domain}
+  Sankalp Ojha \\
+  Colgate University  \\
+  Mathematics  \\
+  {\tt sojha@colgate.edu}
 }
 
-\date{}
+\date{04/03/2025}
 
 \maketitle
 
@@ -100,37 +100,58 @@ Provide an overarching summary of what you're talking about. In this section, yo
 
 You want to provide enough background to understand the context of the work. Specifically, what is the question you are addressing? If it applies, describe what information currently exists about this problem, including citations, and explain how the question you're answering complements this work.
 
-Provide a roadmap of the structure of the paper. 
+\section{Density Functions and Parameters}
+The Beta distribution is a continuous distribution. A continuous distribution is one which has probability density function (PDF) and a cumulative density function (CDF) to represent its probability. The Beta distribution has two parameters, $\alpha$ and $\beta$, which dictate on the distribution looks. Both $\alpha$ and $\beta$ are positive numbers and correspond to \texttt{shape1} and \texttt{shape2}, respectively, when write code for the Beta distribution in \texttt{R}.
 
-\subsection{Intro Subsection}
-You might need/want to discuss the topics in subsections. Or, you may have multiple questions.
+\[f_X(x|\alpha, \beta) = \frac{\Gamma(\alpha + \beta)}{\Gamma\alpha\Gamma\beta} x^{\alpha-1}(1-x)^{\beta-1}I(x \in [0,1]).\]
 
-\begin{Figure}
-\includegraphics{screenshot}
-\end{Figure}
+\indent In the beta distribution, $I(x \in [0,1]) = 1$ when $x \in [0,1]$ and $0$ whenever $x$ does not hold a number in support on the Beta distribution. The support of a random variable $X$ in the Beta distribution is $[0,1]$.
 
-\section{Methods}
-Describe the data you are working with, if applicable. Describe the specific process you will follow to answer the question at hand. This does not mean you should write something like this.
-\begin{quote}
-\textit{I did this and then I did that and then I did this other thing and then..., and then..., and then...}
-\end{quote}
-Instead, it should provide a clear and concise narrative that flows from the problem specification in the Introduction to how you will approach answering it. This is where I would expect to see some citations for \texttt{R} packages you will use to conduct the statistical analysis reported in the Results section.
+\section{Properties and Key Statistics}
+The Beta distribution is a very versatile and flexible function when it comes to the shapes it can take on based on the various values of the $\alpha$ and $\beta$ parameters. The various forms of the Beta distribution can be shown through statistics such as mean, variance, skewness, and excess kurtosis. Something to note about the \verb|kurt()| function in \texttt{R} is that it computes the excess kurtosis. So, if we are interested in finding kurtosis of a distribution, we can simply add three to the excess kurtosis found through the \verb|kurt()| function. The equations which can be used to calculate the statistics for a Beta distribution are written in terms of $\alpha$ and $\beta$, as seen below:
 
+\begin{align*}
+ E(X) = \frac{\alpha}{\alpha + \beta} \tag{The Mean}\\
+var(X) = \frac{\alpha\beta}{(\alpha + \beta)^2(\alpha + \beta + 1)} \tag{The Variance} \\
+skew(X) = \frac{2(\beta - \alpha)\sqrt{\alpha + \beta + 1}}{(\alpha + \beta + 2)\sqrt{\alpha\beta}} \tag{The Skewness}
+\end{align*}
+\[kurt(X) = \frac{6[(\alpha - \beta)^2(\alpha + \beta + 1) - \alpha\beta(\alpha + \beta + 2)]}{\alpha\beta(\alpha + \beta + 2)(\alpha + \beta + 3)}\]
+\begin{flushright}
+(The Excess Kurtosis)
+\end{flushright}
 
-\subsection{Methods Subsection}
-Much like the Introduction, subsections can be helpful for the Methods section. For example, you might describe data collection and the statistical analyses of the collected data in different subsections. Or, you may have different questions that require distinct methods. 
+Another way to compute these statistics is through their centered and uncentered $k$th moments. We can compute various combinations of centered and uncentered $k$th moments of the Beta distribution to calculate a certain statistic, as seen below:
 
-\section{Results}
-Tie together the Introduction -- where you introduce the problem at hand -- and the methods --  what you propose to do to answer the question. Present your data, the results of your analyses, and how each reported aspect contributes to answering the question. This section should include table(s), statistic(s), and graphical displays. Make sure to put the results in a sensible order and that each result contributes a logical and developed solution. It should not just be a list. Avoid being repetitive. 
+\begin{align*}
+ \mu_X = E(X) \tag{The Mean}\\
+ var(X) = \sigma^2_X = E[(X-\mu_X)]^2 \tag{The Variance}\\
+ skew(X) = \frac{E[(X - \mu_X)^3]}{E[(X-\mu_X)^2]^{3/2}} \tag{The Skewness}\\
+ kurt(X) = \frac{E[(X-\mu_X)^4]}{E[(X-\mu_X)^2]^2} - 3 \tag{The Excess Kurtsosis}
+\end{align*}
 
-\subsection{Results Subsection}
-Subsections can be helpful for the Results section, too. This can be particularly helpful if you have different questions to answer. 
+To generalize these equations to calculate any centered or uncentered $k$th moment of the Beta distribution, we can use the equations
 
+\[E(X^{k}) = \int_{\chi}^{} x^{k}f_x(x) \,dx \]
+\begin{center}
+and 
+\end{center}
+\[E((X-\mu_X)^{k}) = \int_{\chi}^{} (x-\mu_X)^{k}f_x(x) \,dx \]
 
-\section{Discussion}
- You should objectively evaluate the evidence you found in the data. Do not embellish or wish-terpet (my made-up phase for making an interpretation you, or the researcher, wants to be true without the data \emph{actually} supporting it). Connect your findings to the existing information you provided in the Introduction.
+where the first equation corresponds to a centered $k$th moment and the second equation corresponds to a uncentered $k$th moment.
 
-Finally, provide some concluding remarks that tie together the entire paper. Think of the last part of the results as abstract-like. Tell the reader what they just consumed -- what's the takeaway message?
+For the purposes of this lab, a function \verb|beta.moment(alpha, beta, k, centered)| was made to calculate the various statistics of the Beta distribution for various values of $\alpha$ and $\beta$.
+
+\subsection{Power of Larger Sample Sizes}
+By generating a large random sample from a from a fixed Beta distribution with parameters $\alpha = 2$ and $\beta = 5$, we were able to prove that larger random sample sizes converge closer to the exact distribution. Using the \texttt{cumstats} package \cite{cumstats}, a figure illustrates how the Weak Law Of Large Numbers, which states that as the sample size increases so will the precision increase towards the total population distribution.
+
+\section{Estimators And Checking Precision}
+When dealing with data in real world applications, we don't necessarily know what the values of the parameters $\alpha$ and $\beta$ will be for the given data set. This is where we use point estimators to calculate the precise values of $\alpha$ and $\beta$ which will best fit the data set. The two methods to estimate include: Method of Moments (MOM) and Maximum Likelihood Estimation (MLE). The MOM approach equates the first sample $k$th moments to the first population $k$th moments. The goal is to find which values of $\alpha$ and $\beta$ will match the data set moments best with the population moments. The MLE approach utilizes a likelihood function which aims to find the values of $\alpha$ and $\beta$ which will maximize the likelihood of matching the shape given data set. Ås both of these methods are estimates, we would like to know how precise the estimates are, which we can do through caluculating Bias, Prescision, and Mean Squared Error (MSE). Bias caluculates the average difference from the true value, precision calculates the consistency of the estimates, and MSE combines both prior metrics to calculate the error. The equations to calculate each measure are:
+
+\[\text{Bias} = \mathbb{E}(\hat{\theta}) - \theta\]
+\[\text{Precision} = \frac{1}{\text{Var}(\hat{\theta})}\]
+\[\text{MSE} = \text{Var}(\hat{\theta}) + \left( \mathbb{E}(\hat{\theta}) - \theta \right)^2\]
+
+\noindent where $\boldsymbol{\hat{\theta}}$ is a given vector of estimates and $\boldsymbol{\theta}$ is the true value.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Bibliography
@@ -141,7 +162,7 @@ Finally, provide some concluding remarks that tie together the entire paper. Thi
 you cite them in your document, the bibliography section will automatically populate here.
 
 \begin{tiny}
-\bibliography{bib}
+\bibliography{bib7}
 \end{tiny}
 \end{multicols}
 
@@ -152,6 +173,28 @@ you cite them in your document, the bibliography section will automatically popu
 \onecolumn
 \section{Appendix}
 
-If you have anything extra, you can add it here in the appendix. This can include images or tables that don't work well in the two-page setup, code snippets you might want to share, etc.
+\begin{table}[ht]
+\centering
+\caption{Population Summary Of 4 Beta Distribution Parameters}
+\label{table1}
+\begin{tabular}{rrrrrrr}
+  \hline
+ & Alpha & Beta & Mean & Variance & Skewness & Excess Kurtosis \\ 
+  \hline
+1 & 2.00 & 5.00 & 0.29 & 0.03 & 0.60 & -0.12 \\ 
+  2 & 5.00 & 5.00 & 0.50 & 0.02 & 0.00 & -0.46 \\ 
+  3 & 5.00 & 2.00 & 0.71 & 0.03 & -0.60 & -0.12 \\ 
+  4 & 0.50 & 0.50 & 0.50 & 0.12 & 0.00 & -1.50 \\ 
+   \hline
+\end{tabular}
+\end{table}
+
+\begin{figure}[ht]
+  \begin{center}
+  \includegraphics[width=\textwidth]{Rplot.pdf}
+  \caption{$\alpha$=2 and $\beta$=5 Convergence Simulation}
+  \label{plot1}
+  \end{center}
+\end{figure}
 
 \end{document}
