@@ -75,7 +75,7 @@
 \begin{document}
 
 \vspace{-1in}
-\title{Lab XX -- MATH 240 -- Computational Statistics}
+\title{Lab 7/8 -- MATH 240 -- Computational Statistics}
 
 \author{
   Sankalp Ojha \\
@@ -90,18 +90,16 @@
 
 \begin{multicols}{2}
 \begin{abstract}
-This document provides a basic template for the 2-page labs we will complete each week. Here, briefly summarize what you did and why it might be helpful. Provide all the top-line conclusions, but avoid providing \emph{all} the details. Results should be limited to ``we show X, Y, and Z."
+In this lab, we explored the Beta distribution. We explored the parameters and properties of the Beta distribution. We also explored the use of two point estimators, Method of Moments (MOM) and Maximum Likelihood Estimator (MLE), and how to check their accuracy. The point estimation methods were tested with real world data. We concluded that the MLE is better at finding the appropriate $\alpha$ and $\beta$ values compared to MOM.
 \end{abstract}
 
-\noindent \textbf{Keywords:} What topics does the lab cover concerning class? List 3-4 key terms here, separated by semicolons.
+\noindent \textbf{Keywords:} Beta distribution, MOM, MLE, $\alpha$, and $\beta$
 
-\section{Introduction}
-Provide an overarching summary of what you're talking about. In this section, you introduce the idea to the reader, and your goal is to pull them in. What's the mystery you aim to solve?
-
-You want to provide enough background to understand the context of the work. Specifically, what is the question you are addressing? If it applies, describe what information currently exists about this problem, including citations, and explain how the question you're answering complements this work.
+\section{Introduction To Beta Distributions}
+The Beta distribution is a continuous distribution. The Beta distribution models the behavior of a random variable $X$ within the support of 0 to 1. The Beta distribution is widely known for its flexibility, which makes it useful to model various datasets, probabilities, etc. Depending on the values of the parameters $\alpha$ and $\beta$, which will be discussed furthered in section 2, the Beta distribution can take on left-skewed, right-skewed, U-shaped, or symmetric shapes, as seen in \autoref{plot0}. Section 2 provides a greater description for the parameters for the Beta distribution. Section 3 discusses the properties and statistics of the Beta distribution. Sections 4 and 5 discusses point estimators and three metrics which we can use to check how accurate the estimators are, followed by a real world example of the use case for the estimators and checking metrics.
 
 \section{Density Functions and Parameters}
-The Beta distribution is a continuous distribution. A continuous distribution is one which has probability density function (PDF) and a cumulative density function (CDF) to represent its probability. The Beta distribution has two parameters, $\alpha$ and $\beta$, which dictate on the distribution looks. Both $\alpha$ and $\beta$ are positive numbers and correspond to \texttt{shape1} and \texttt{shape2}, respectively, when write code for the Beta distribution in \texttt{R}.
+A continuous distribution is one which has probability density function (PDF) and a cumulative density function (CDF) to represent its probability. The Beta distribution has two parameters, $\alpha$ and $\beta$, which dictate on the distribution looks. Both $\alpha$ and $\beta$ are positive numbers and correspond to \texttt{shape1} and \texttt{shape2}, respectively, when write code for the Beta distribution in \texttt{R}. The Beta distribution PDF is given as:
 
 \[f_X(x|\alpha, \beta) = \frac{\Gamma(\alpha + \beta)}{\Gamma\alpha\Gamma\beta} x^{\alpha-1}(1-x)^{\beta-1}I(x \in [0,1]).\]
 
@@ -119,6 +117,8 @@ skew(X) = \frac{2(\beta - \alpha)\sqrt{\alpha + \beta + 1}}{(\alpha + \beta + 2)
 \begin{flushright}
 (The Excess Kurtosis)
 \end{flushright}
+
+\autoref{table2} tables all the summary statistics for the various Beta distributions seen in \autoref{plot0} and illustrates how the $\alpha$ and $\beta$ dictate the shape of the Beta distribution.
 
 Another way to compute these statistics is through their centered and uncentered $k$th moments. We can compute various combinations of centered and uncentered $k$th moments of the Beta distribution to calculate a certain statistic, as seen below:
 
@@ -142,10 +142,10 @@ where the first equation corresponds to a centered $k$th moment and the second e
 For the purposes of this lab, a function \verb|beta.moment(alpha, beta, k, centered)| was made to calculate the various statistics of the Beta distribution for various values of $\alpha$ and $\beta$.
 
 \subsection{Power of Larger Sample Sizes}
-By generating a large random sample from a from a fixed Beta distribution with parameters $\alpha = 2$ and $\beta = 5$, we were able to prove that larger random sample sizes converge closer to the exact distribution. Using the \texttt{cumstats} package \cite{cumstats}, a figure illustrates how the Weak Law Of Large Numbers, which states that as the sample size increases so will the precision increase towards the total population distribution.
+By generating a large random sample from a fixed Beta distribution with parameters $\alpha = 2$ and $\beta = 5$, we were able to prove that larger random sample sizes converge closer to the exact distribution. Using the \texttt{cumstats} package \citep{cumstats}, I made \autoref{plot1}, which illustrates how the Weak Law Of Large Numbers works. The Weak Law Of Large Numbers suggests that as the sample size increases so will the precision increase towards the total population distribution.
 
-\section{Estimators And Checking Precision}
-When dealing with data in real world applications, we don't necessarily know what the values of the parameters $\alpha$ and $\beta$ will be for the given data set. This is where we use point estimators to calculate the precise values of $\alpha$ and $\beta$ which will best fit the data set. The two methods to estimate include: Method of Moments (MOM) and Maximum Likelihood Estimation (MLE). The MOM approach equates the first sample $k$th moments to the first population $k$th moments. The goal is to find which values of $\alpha$ and $\beta$ will match the data set moments best with the population moments. The MLE approach utilizes a likelihood function which aims to find the values of $\alpha$ and $\beta$ which will maximize the likelihood of matching the shape given data set. Ås both of these methods are estimates, we would like to know how precise the estimates are, which we can do through caluculating Bias, Prescision, and Mean Squared Error (MSE). Bias caluculates the average difference from the true value, precision calculates the consistency of the estimates, and MSE combines both prior metrics to calculate the error. The equations to calculate each measure are:
+\section{Estimators And Precision}
+When dealing with data in real world applications, we don't necessarily know what the values of the parameters $\alpha$ and $\beta$ will be for the given data set. This is where we use point estimators to calculate the precise values of $\alpha$ and $\beta$ which will best fit the data set. The two methods to estimate include: Method of Moments (MOM) and Maximum Likelihood Estimation (MLE). The MOM approach equates the first sample $k$th moments to the first population $k$th moments. The goal is to find which values of $\alpha$ and $\beta$ will match the data set moments best with the population moments. The MLE approach utilizes a likelihood function which aims to find the values of $\alpha$ and $\beta$ which will maximize the likelihood of matching the shape given data set. In \texttt{R}, to compute the values of $\alpha$ and $\beta$ using MOM, we first make a function which returns the first population $k$th moments minus the first sample $k$th moments. Then we used the \texttt{nleqslv} package \citep{nleqslv} and the function \verb|nleqslv()| to solve for the values of $\alpha$ and $\beta$ which make first population $k$th moments minus the first sample $k$th moments equal to zero. The MLE is implemented through a function which is passed into \verb|optim()|. The \verb|optim()| function maximizes the negative log-likelihood function. As both of these methods are estimates, we would like to know how precise the estimates are, which we can do through calculating Bias, Precision, and Mean Squared Error (MSE). Bias calculates the average difference from the true value, precision calculates the consistency of the estimates, and MSE combines both prior metrics to calculate the error. The equations to calculate each measure are:
 
 \[\text{Bias} = \mathbb{E}(\hat{\theta}) - \theta\]
 \[\text{Precision} = \frac{1}{\text{Var}(\hat{\theta})}\]
@@ -153,14 +153,31 @@ When dealing with data in real world applications, we don't necessarily know wha
 
 \noindent where $\boldsymbol{\hat{\theta}}$ is a given vector of estimates and $\boldsymbol{\theta}$ is the true value.
 
+\section{Example: World Death Rates}
+The study, \cite{faith}, suggests the worldwide death rates can be modeled by a Beta distribution with the specific parameters, $\alpha = 8$ and $\beta = 950$. Using the MOM and MLE estimator methods, we calculated the $\alpha$ and $\beta$ which would best fit the dataset for 1000 random samples of of size $n = 266$ for world death rates. To check which estimator is more accurate, we can use Bias, Precision, and MSE. Below is a table information about the accuracy of each estimator:
+
+\begin{Figure}
+\centering
+\begin{tabular}{rllrrr}
+  \hline
+ parameters & method & bias & precision & mse \\ 
+  \hline
+    Alpha & MOM & 0.08 & 1.83 & 0.55 \\ 
+    Alpha & MLE & 0.07 & 2.13 & 0.48 \\ 
+    Beta & MOM & 10.29 & 0.00 & 8288.46 \\ 
+    Beta & MLE & 9.11 & 0.00 & 7132.70 \\ 
+   \hline
+\end{tabular}
+\captionof{table}{MOM and MLE bias, precision, and MSE for $\alpha$ and $\beta$.}
+\label{table1}
+\end{Figure}
+
+As can be seen in the table, the MLE estimator is the more precise estimator. In the Bias, Precision, and MSE categories, MLE had lower numbers than MOM. This indicates that MLE is less bias, more precise, and overall a more accurate point estimator tool. It should be noted that the precision calculations for MOM and MLE $\beta$ were extremely small and are represented as zero as a result. While both methods are not fully accurate, MLE proves to be the superior method.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Bibliography
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \vspace{2em}
-
-\noindent\textbf{Bibliography:} Note that when you add citations to your bib.bib file \emph{and}
-you cite them in your document, the bibliography section will automatically populate here.
-
 \begin{tiny}
 \bibliography{bib7}
 \end{tiny}
@@ -173,10 +190,18 @@ you cite them in your document, the bibliography section will automatically popu
 \onecolumn
 \section{Appendix}
 
+\begin{figure}[ht]
+  \begin{center}
+  \includegraphics[width=\textwidth]{Rplot03.pdf}
+  \caption{Plotting various beta PDFs with varying $\alpha$ and $\beta$ values.}
+  \label{plot0}
+  \end{center}
+\end{figure}
+
 \begin{table}[ht]
 \centering
-\caption{Population Summary Of 4 Beta Distribution Parameters}
-\label{table1}
+\caption{Population Summary Of 4 Beta Distribution Parameters with varying $\alpha$ and $\beta$ values.}
+\label{table2}
 \begin{tabular}{rrrrrrr}
   \hline
  & Alpha & Beta & Mean & Variance & Skewness & Excess Kurtosis \\ 
@@ -192,8 +217,24 @@ you cite them in your document, the bibliography section will automatically popu
 \begin{figure}[ht]
   \begin{center}
   \includegraphics[width=\textwidth]{Rplot.pdf}
-  \caption{$\alpha$=2 and $\beta$=5 Convergence Simulation}
+  \caption{$\alpha$=2 and $\beta$=5 convergence simulation to show the weak law of large numbers.}
   \label{plot1}
+  \end{center}
+\end{figure}
+
+\begin{figure}[ht]
+  \begin{center}
+  \includegraphics[width=\textwidth]{Rplot01.pdf}
+  \caption{Beta($\alpha$=2 and $\beta$=5) sampling distributions to illustrate various summary statistics.}
+  \label{plot2}
+  \end{center}
+\end{figure}
+
+\begin{figure}[ht]
+  \begin{center}
+  \includegraphics[width=\textwidth]{Rplot02.pdf}
+  \caption{Resampled beta($\alpha$=8 and $\beta$=950) sampling distributions to illustrate the shape parameters behavior.}
+  \label{plot3}
   \end{center}
 \end{figure}
 
